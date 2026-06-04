@@ -1,1 +1,1096 @@
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Postillon | Confort en Ciudad del Este</title>
+    
+    <!-- Leaflet.js para el mapa interactivo -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    
+    <style>
+        :root {
+            --primary: #0b1a21; /* Azul profundo elegante */
+            --secondary: #132e3b; /* Azul medio */
+            --accent: #d4af37; /* Dorado premium */
+            --accent-hover: #bda030;
+            --text-dark: #2c3e50;
+            --text-light: #ffffff;
+            --bg-light: #f4f7f6;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            color: var(--text-dark);
+            background-color: var(--bg-light);
+            line-height: 1.6;
+        }
+
+        /* Top Bar de Anuncio */
+        .top-bar {
+            background-color: var(--accent);
+            color: var(--primary);
+            text-align: center;
+            padding: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        /* Header & Nav */
+        header {
+            background-color: var(--primary);
+            color: var(--text-light);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.15);
+        }
+
+        .logo {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo h1 {
+            font-size: 1.4rem;
+            color: var(--accent);
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
+
+        .logo span {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.8;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            margin-left: 1.8rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            position: relative;
+            padding: 0.2rem 0;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--accent);
+            transition: var(--transition);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        nav a:hover {
+            color: var(--accent);
+        }
+
+        /* Botón de Menú Móvil */
+        .menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(11, 26, 33, 0.75), rgba(19, 46, 59, 0.75)), 
+                        url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600&q=80') no-repeat center center/cover;
+            height: 75vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: var(--text-light);
+            padding: 0 1.5rem;
+        }
+
+        .hero h2 {
+            font-size: 3.2rem;
+            margin-bottom: 1.2rem;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
+            opacity: 0.95;
+        }
+
+        .btn-cta {
+            background-color: var(--accent);
+            color: var(--primary);
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.05rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(212, 175, 55, 0.5);
+            background-color: #f1c40f;
+        }
+
+        /* Grid de Servicios */
+        .services {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .section-subtitle {
+            color: #7f8c8d;
+            margin-bottom: 3rem;
+            font-size: 1.05rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .services h3::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 3px;
+            background-color: var(--accent);
+            margin: 12px auto 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .card {
+            background: white;
+            padding: 2.5rem 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .card h4 {
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .card p {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+
+        /* Habitaciones Showcase */
+        .rooms-section {
+            background-color: #fff;
+            padding: 5rem 2rem;
+        }
+
+        .rooms-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            margin-top: 2rem;
+        }
+
+        .room-card {
+            background-color: var(--bg-light);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .room-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .room-img {
+            height: 230px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .room-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: var(--accent);
+            color: var(--primary);
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .room-details {
+            padding: 2rem;
+        }
+
+        .room-details h4 {
+            font-size: 1.4rem;
+            color: var(--primary);
+            margin-bottom: 0.8rem;
+        }
+
+        .room-amenities {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+
+        .room-amenity {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .room-price {
+            font-size: 1.5rem;
+            color: var(--secondary);
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+
+        .room-price span {
+            font-size: 0.9rem;
+            font-weight: normal;
+            color: #7f8c8d;
+        }
+
+        /* Cotizador Dinámico de Reservas */
+        .booking-section {
+            padding: 5rem 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--text-light);
+        }
+
+        .booking-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .booking-container h3 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+
+        .booking-container p {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            opacity: 0.85;
+        }
+
+        .booking-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--accent);
+        }
+
+        .form-group select, .form-group input {
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background-color: rgba(255,255,255,0.1);
+            color: var(--text-light);
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .form-group select option {
+            background-color: var(--primary);
+            color: var(--text-light);
+        }
+
+        .form-group select:focus, .form-group input:focus {
+            border-color: var(--accent);
+            background-color: rgba(255,255,255,0.15);
+        }
+
+        .price-display {
+            background-color: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--accent);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            grid-column: span 2;
+            margin-top: 1rem;
+        }
+
+        .price-display h4 {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .price-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin: 0.5rem 0;
+        }
+
+        .btn-booking {
+            grid-column: span 2;
+            background-color: var(--accent);
+            color: var(--primary);
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-booking:hover {
+            background-color: #f1c40f;
+            transform: translateY(-2px);
+        }
+
+        /* Ubicación con Mapa Real Leaflet */
+        .location-section {
+            padding: 5rem 2rem;
+        }
+
+        .location-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.2fr 1.8fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .location-info h3 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .location-info p {
+            color: #555;
+            font-size: 1.05rem;
+            margin-bottom: 2rem;
+        }
+
+        .contact-details {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.05rem;
+        }
+
+        .contact-icon {
+            font-size: 1.5rem;
+            color: var(--accent);
+            width: 40px;
+            height: 40px;
+            background-color: rgba(212, 175, 55, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #map {
+            height: 450px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.05);
+            z-index: 1;
+        }
+
+        /* Botón de Whatsapp Flotante */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #25d366;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 9999;
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 1.8rem;
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.1) rotate(10deg);
+            background-color: #20ba5a;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            background-color: var(--bg-light);
+            padding: 5rem 2rem;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background-color: #fff;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .faq-question::after {
+            content: '+';
+            font-size: 1.4rem;
+            color: var(--accent);
+            transition: var(--transition);
+        }
+
+        .faq-item.active .faq-question::after {
+            content: '-';
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding: 0 1.5rem;
+            color: #7f8c8d;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 200px;
+            padding-bottom: 1.5rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--primary);
+            color: rgba(255,255,255,0.7);
+            padding: 4rem 2rem 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-logo h2 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .footer-links h4, .footer-hours h4 {
+            color: white;
+            margin-bottom: 1.2rem;
+            font-size: 1.1rem;
+            position: relative;
+        }
+
+        .footer-links h4::after, .footer-hours h4::after {
+            content: '';
+            display: block;
+            width: 30px;
+            height: 2px;
+            background-color: var(--accent);
+            margin-top: 5px;
+        }
+
+        .footer-links ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .footer-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+            padding-left: 5px;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .booking-form {
+                grid-template-columns: 1fr;
+            }
+            .form-group.full-width, .price-display, .btn-booking {
+                grid-column: span 1;
+            }
+            .location-grid {
+                grid-template-columns: 1fr;
+            }
+            #map {
+                height: 350px;
+            }
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .menu-btn {
+                display: block;
+            }
+            nav {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background-color: var(--primary);
+                padding: 1.5rem;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            }
+            nav.active {
+                display: flex;
+            }
+            nav a {
+                margin: 1rem 0;
+                font-size: 1.1rem;
+                width: 100%;
+                text-align: center;
+            }
+            .hero h2 {
+                font-size: 2.2rem;
+            }
+            .hero p {
+                font-size: 1.05rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        ✨ ¡Mejor Precio Garantizado Reservando Directamente por WhatsApp!
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <h1>HOTEL POSTILLON</h1>
+            <span>Confort & Ubicación</span>
+        </div>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        <nav id="nav-menu">
+            <a href="#inicio" onclick="toggleMenu()">Inicio</a>
+            <a href="#servicios" onclick="toggleMenu()">Servicios</a>
+            <a href="#habitaciones" onclick="toggleMenu()">Habitaciones</a>
+            <a href="#reservas" onclick="toggleMenu()">Cotizador</a>
+            <a href="#ubicacion" onclick="toggleMenu()">Ubicación</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="inicio">
+        <h2>La Puerta de Entrada a tu Descanso</h2>
+        <p>Ubicado estratégicamente justo detrás de la Terminal de Ómnibus de Ciudad del Este. El punto ideal para turistas, viajeros frecuentes y compradores.</p>
+        <a href="#reservas" class="btn-cta">
+            Calcular Reserva
+            <span>➔</span>
+        </a>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services" id="servicios">
+        <h3 class="section-title">¿Por Qué Elegirnos?</h3>
+        <p class="section-subtitle">Brindamos una experiencia de alojamiento acogedora con la calidez y el servicio que te mereces.</p>
+        <div class="grid">
+            <div class="card">
+                <span class="card-icon">🏨</span>
+                <h4>Ubicación Inmejorable</h4>
+                <p>Ubicados a pasos de la Terminal de CDE. Conectividad instantánea para tus viajes y paseos de compras.</p>
+            </div>
+            <div class="card">
+                <span class="card-icon">🛏️</span>
+                <h4>Habitaciones Equipadas</h4>
+                <p>Camas confortables, aire acondicionado (frío/calor), TV y baño privado en todas las opciones.</p>
+            </div>
+            <div class="card">
+                <span class="card-icon">📶</span>
+                <h4>Wi-Fi & Estacionamiento</h4>
+                <p>Internet de alta velocidad de cortesía en todo el establecimiento y estacionamiento seguro para tu vehículo.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Habitaciones Section -->
+    <section class="rooms-section" id="habitaciones">
+        <div class="rooms-container">
+            <h3 class="section-title" style="text-align: center;">Nuestras Habitaciones</h3>
+            <p class="section-subtitle" style="text-align: center;">Encuentra el espacio perfecto que mejor se adapte a tu viaje.</p>
+            
+            <div class="rooms-grid">
+                <!-- Habitación Standard -->
+                <div class="room-card">
+                    <div class="room-img" style="background-image: url('https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=600&q=80')">
+                        <div class="room-badge">Popular</div>
+                    </div>
+                    <div class="room-details">
+                        <h4>Habitación Matrimonial</h4>
+                        <div class="room-amenities">
+                            <div class="room-amenity"><span>🛏️</span> 1 Cama Matr.</div>
+                            <div class="room-amenity"><span>❄️</span> A.A.</div>
+                            <div class="room-amenity"><span>📶</span> Wi-Fi Gratis</div>
+                        </div>
+                        <p style="color:#7f8c8d; margin-bottom: 1rem; font-size: 0.9rem;">Ideal para parejas que buscan confort y conveniencia tras un largo viaje de compras o turismo.</p>
+                        <div class="room-price">
+                            GS. 180.000 <span>/ noche</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Habitación Doble Single -->
+                <div class="room-card">
+                    <div class="room-img" style="background-image: url('https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80')">
+                    </div>
+                    <div class="room-details">
+                        <h4>Habitación Doble (Dos Camas)</h4>
+                        <div class="room-amenities">
+                            <div class="room-amenity"><span>🛏️</span> 2 Camas Ind.</div>
+                            <div class="room-amenity"><span>❄️</span> A.A.</div>
+                            <div class="room-amenity"><span>📶</span> Wi-Fi Gratis</div>
+                        </div>
+                        <p style="color:#7f8c8d; margin-bottom: 1rem; font-size: 0.9rem;">Excelente opción para colegas de negocios o amigos. Camas sumamente cómodas y baño privado.</p>
+                        <div class="room-price">
+                            GS. 200.000 <span>/ noche</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Habitación Triple -->
+                <div class="room-card">
+                    <div class="room-img" style="background-image: url('https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=600&q=80')">
+                    </div>
+                    <div class="room-details">
+                        <h4>Habitación Familiar Triple</h4>
+                        <div class="room-amenities">
+                            <div class="room-amenity"><span>🛏️</span> 3 Camas</div>
+                            <div class="room-amenity"><span>❄️</span> A.A.</div>
+                            <div class="room-amenity"><span>📶</span> Wi-Fi Gratis</div>
+                        </div>
+                        <p style="color:#7f8c8d; margin-bottom: 1rem; font-size: 0.9rem;">Perfecta para familias o grupos de compradores. Espaciosa, limpia y equipada con el mejor confort.</p>
+                        <div class="room-price">
+                            GS. 250.000 <span>/ noche</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cotizador Dinámico -->
+    <section class="booking-section" id="reservas">
+        <div class="booking-container">
+            <h3>Calcula tu Estadía</h3>
+            <p>Selecciona tus preferencias y reserva de forma inmediata a través de WhatsApp con tu tarifa calculada.</p>
+            
+            <div class="booking-form">
+                <div class="form-group">
+                    <label for="room-select">Tipo de Habitación</label>
+                    <select id="room-select" onchange="calculateTotal()">
+                        <option value="180000" data-name="Matrimonial (GS. 180.000)">Matrimonial — GS. 180.000</option>
+                        <option value="200000" data-name="Doble Dos Camas (GS. 200.000)">Doble Individuales — GS. 200.000</option>
+                        <option value="250000" data-name="Familiar Triple (GS. 250.000)">Familiar Triple — GS. 250.000</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="guests">Huéspedes</label>
+                    <select id="guests">
+                        <option value="1">1 Persona</option>
+                        <option value="2">2 Personas</option>
+                        <option value="3">3 Personas</option>
+                        <option value="4">4 Personas</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="check-in">Fecha de Check-In</label>
+                    <input type="date" id="check-in" onchange="calculateTotal()">
+                </div>
+
+                <div class="form-group">
+                    <label for="check-out">Fecha de Check-Out</label>
+                    <input type="date" id="check-out" onchange="calculateTotal()">
+                </div>
+
+                <div class="price-display">
+                    <h4>Total Estimado</h4>
+                    <div class="price-value" id="calculated-price">GS. 180.000</div>
+                    <p style="font-size: 0.85rem; margin:0;" id="nights-display">1 Noche(s)</p>
+                </div>
+
+                <button class="btn-booking" onclick="sendWhatsAppBooking()">
+                    <span>💬</span> Reservar por WhatsApp
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ubicación Section -->
+    <section class="location-section" id="ubicacion">
+        <div class="location-grid">
+            <div class="location-info">
+                <h3>Contacto & Ubicación</h3>
+                <p>Nuestra excelente ubicación te garantiza acceso rápido a las principales arterias comerciales de Ciudad del Este y facilidad de transporte.</p>
+                
+                <div class="contact-details">
+                    <div class="contact-item">
+                        <div class="contact-icon">📍</div>
+                        <div>
+                            <strong>Dirección</strong>
+                            <p>Detrás de la Terminal de CDE, Ciudad del Este, Paraguay</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">📞</div>
+                        <div>
+                            <strong>Teléfono Fijo</strong>
+                            <p>(061) 51 86 21</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">📱</div>
+                        <div>
+                            <strong>WhatsApp Principal</strong>
+                            <p>(0973) 894 369</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mapa interactivo real de Leaflet -->
+            <div id="map"></div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="faq-container">
+            <h3 class="section-title" style="text-align: center;">Preguntas Frecuentes</h3>
+            <p class="section-subtitle" style="text-align: center;">Resuelve tus dudas rápidas antes de tu estadía con nosotros.</p>
+
+            <div class="faq-item">
+                <div class="faq-question">¿Cuál es el horario de Check-In y Check-Out?</div>
+                <div class="faq-answer">
+                    El horario regular de ingreso (Check-In) es a partir de las 13:00 hs, y el de salida (Check-Out) debe realizarse antes de las 11:00 hs. Si necesitas flexibilidad de horario, por favor contáctanos con antelación.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">¿Tienen estacionamiento privado?</div>
+                <div class="faq-answer">
+                    Sí, contamos con estacionamiento privado y seguro exclusivo para nuestros huéspedes, sin costo adicional.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">¿A qué distancia están de la zona comercial?</div>
+                <div class="faq-answer">
+                    Estamos ubicados estratégicamente justo detrás de la Terminal de Ómnibus de CDE, a solo 5-10 minutos en vehículo de la zona céntrica de microcentro y los principales shoppings de compras.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <h2>HOTEL POSTILLON</h2>
+                <p>Tu descanso perfecto con la conveniencia de estar cerca de todo. Más de una década brindando confort y amabilidad a nuestros huéspedes.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Enlaces Útiles</h4>
+                <ul>
+                    <li><a href="#inicio">Inicio</a></li>
+                    <li><a href="#servicios">Servicios</a></li>
+                    <li><a href="#habitaciones">Habitaciones</a></li>
+                    <li><a href="#reservas">Cotizador</a></li>
+                </ul>
+            </div>
+            <div class="footer-hours">
+                <h4>Atención</h4>
+                <p style="margin-bottom: 0.5rem;">🕒 Recepción activa las 24 horas.</p>
+                <p style="font-size: 0.85rem; color: rgba(255,255,255,0.5);">Trabajamos de lunes a domingos y feriados.</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Hotel Postillon. Todos los derechos reservados. Ciudad del Este, Paraguay.</p>
+        </div>
+    </footer>
+
+    <!-- Botón flotante de Whatsapp -->
+    <a href="https://wa.me/595973894369" class="whatsapp-float" target="_blank" title="Chatear con nosotros">
+        📱
+    </a>
+
+    <!-- Leaflet.js para el mapa interactivo -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        // Establecer fechas predeterminadas en el cotizador (hoy y mañana)
+        window.onload = function() {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            document.getElementById('check-in').value = today.toISOString().split('T')[0];
+            document.getElementById('check-out').value = tomorrow.toISOString().split('T')[0];
+            
+            calculateTotal();
+            initMap();
+            initFAQ();
+        };
+
+        // Función para abrir/cerrar menú móvil
+        function toggleMenu() {
+            const nav = document.getElementById('nav-menu');
+            nav.classList.toggle('active');
+        }
+
+        // Inicializar el Mapa Interactivo de Leaflet
+        function initMap() {
+            // Ubicación aproximada detrás de la terminal de ómnibus CDE
+            const cdeTerminalLatLng = [-25.5240, -54.6288]; 
+            const map = L.map('map').setView(cdeTerminalLatLng, 16);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Crear ícono dorado personalizado para el hotel
+            const hotelIcon = L.divIcon({
+                html: '<div style="background-color:#d4af37; width:20px; height:20px; border-radius:50%; border:3px solid #0b1a21; box-shadow:0 0 10px rgba(0,0,0,0.5);"></div>',
+                className: 'custom-icon',
+                iconSize: [20, 20]
+            });
+
+            L.marker(cdeTerminalLatLng, { icon: hotelIcon }).addTo(map)
+                .bindPopup('<b>Hotel Postillon</b><br>Detrás de la Terminal de CDE, Paraguay.<br><a href="https://maps.google.com/?q=-25.5240,-54.6288" target="_blank" style="color:#d4af37; text-decoration:none; font-weight:bold;">Ver en Google Maps</a>')
+                .openPopup();
+        }
+
+        // Calcular costo total interactivo
+        function calculateTotal() {
+            const roomPrice = parseFloat(document.getElementById('room-select').value);
+            const checkInVal = document.getElementById('check-in').value;
+            const checkOutVal = document.getElementById('check-out').value;
+
+            if(!checkInVal || !checkOutVal) return;
+
+            const checkInDate = new Date(checkInVal);
+            const checkOutDate = new Date(checkOutVal);
+
+            // Calcular diferencia en milisegundos y luego días
+            const diffTime = checkOutDate - checkInDate;
+            let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays <= 0) {
+                diffDays = 1; // Mínimo 1 noche
+                // Ajustar check-out para el día siguiente si el usuario eligió mal
+                const nextDay = new Date(checkInDate);
+                nextDay.setDate(nextDay.getDate() + 1);
+                document.getElementById('check-out').value = nextDay.toISOString().split('T')[0];
+            }
+
+            const totalPrice = roomPrice * diffDays;
+            
+            // Formatear precio
+            document.getElementById('calculated-price').innerText = "GS. " + totalPrice.toLocaleString('es-PY');
+            document.getElementById('nights-display').innerText = diffDays + " Noche(s)";
+        }
+
+        // Enviar consulta por Whatsapp estructurada automáticamente
+        function sendWhatsAppBooking() {
+            const roomSelect = document.getElementById('room-select');
+            const roomName = roomSelect.options[roomSelect.selectedIndex].getAttribute('data-name');
+            const guests = document.getElementById('guests').value;
+            const checkIn = document.getElementById('check-in').value;
+            const checkOut = document.getElementById('check-out').value;
+            const totalPrice = document.getElementById('calculated-price').innerText;
+            const nights = document.getElementById('nights-display').innerText;
+
+            // Formatear texto para WhatsApp
+            const message = `Hola Hotel Postillon, quisiera hacer una consulta de reserva:\n\n` + 
+                            `🏨 Habitación: *${roomName}*\n` +
+                            `👥 Huéspedes: *${guests} Persona(s)*\n` +
+                            `📅 Check-In: *${checkIn}*\n` +
+                            `📅 Check-Out: *${checkOut}*\n` +
+                            `🌙 Duración: *${nights}*\n` +
+                            `💰 Presupuesto estimado: *${totalPrice}*\n\n` +
+                            `¿Tienen disponibilidad para estas fechas? ¡Muchas gracias!`;
+
+            const encodedMessage = encodeURIComponent(message);
+            // Redirección directa al número principal del hotel
+            const waUrl = `https://wa.me/595973894369?text=${encodedMessage}`;
+            window.open(waUrl, '_blank');
+        }
+
+        // Lógica de Preguntas Frecuentes (Acordeón)
+        function initFAQ() {
+            const questions = document.querySelectorAll('.faq-question');
+            questions.forEach(q => {
+                q.addEventListener('click', () => {
+                    const parent = q.parentElement;
+                    parent.classList.toggle('active');
+                });
+            });
+        }
+    </script>
+</body>
+</html>
+
+```
